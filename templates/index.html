@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}{{ trans['home'] }}{% endblock %}
+
+{% block content %}
+<br><br><br><br><br><br>
+
+<style>
+/* ================== لجعل البطاقات في كل صف متساوية الطول ================== */
+.row > [class*="col-"] {
+  display: flex; /* يجعل العمود مرن */
+}
+
+.row > [class*="col-"] .card {
+  display: flex;
+  flex-direction: column; /* المحتوى عمودي */
+  flex: 1 1 auto; /* يملأ ارتفاع العمود بالكامل */
+  transition: transform 0.3s, box-shadow 0.3s; /* انتقال ناعم للحركة والظل */
+}
+
+/* ================== تأثير Hover على البطاقة والصورة فقط للأجهزة التي تدعم الماوس ================== */
+@media (hover: hover) and (pointer: fine) {
+  /* رفع البطاقة + ظل */
+  .row > [class*="col-"] .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.25);
+  }
+
+  /* تكبير الصورة داخل البطاقة */
+  .row > [class*="col-"] .card:hover .card-img-top {
+    transform: scale(1.05);
+  }
+}
+
+/* ================== انتقال سلس للصور ================== */
+.card-img-top {
+  transition: transform 0.3s ease-in-out;
+}
+</style>
+
+<!-- ================= Full Width Activities Carousel ================= -->
+<div id="homeActivitiesCarousel"
+     class="carousel slide"
+     data-bs-ride="carousel"
+     data-bs-interval="5000"
+     data-bs-pause="false">
+
+  <div class="carousel-inner">
+
+    {% for activity in activities[:5] %}
+    <div class="carousel-item {% if loop.first %}active{% endif %}">
+
+      {% if activity.images %}
+        {% set img = activity.images.split(',')[0] %}
+        <img src="{{ url_for('static', filename='images/uploads/' + img) }}"
+             class="d-block w-100"
+             style="height:85vh; object-fit:cover;">
+      {% else %}
+        <img src="{{ url_for('static', filename='images/placeholder.jpg') }}"
+             class="d-block w-100"
+             style="height:85vh; object-fit:cover;">
+      {% endif %}
+
+      <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-4">
+        <h3>
+          {% if lang == 'ar' %}
+            {{ activity.title_ar }}
+          {% elif lang == 'ku' %}
+            {{ activity.title_ku }}
+          {% elif lang == 'de' %}
+            {{ activity.title_de }}
+          {% else %}
+            {{ activity.title_en }}
+          {% endif %}
+        </h3>
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <button class="carousel-control-prev" type="button"
+          data-bs-target="#homeActivitiesCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+
+  <button class="carousel-control-next" type="button"
+          data-bs-target="#homeActivitiesCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+
+</div>
+
+<!-- ================= Rest of Home Page ================= -->
+<main class="container mt-5">
+
+  <!-- ================= Latest Activities List ================= -->
+  <h4 class="mb-3">📌 {{ trans['all_activities'] }}</h4>
+
+  <div class="row">
+    {% for activity in activities %}
+    <div class="col-12 col-sm-6 col-md-4 mb-4">
+      <div class="card h-100">
+        {% if activity.images %}
+          {% set first_img = activity.images.split(',')[0] %}
+          <img src="{{ url_for('static', filename='images/uploads/' + first_img) }}"
+               class="card-img-top"
+               style="height:200px; object-fit:cover;">
+        {% else %}
+          <img src="{{ url_for('static', filename='images/placeholder.jpg') }}"
+               class="card-img-top"
+               style="height:200px; object-fit:cover;">
+        {% endif %}
+
+        <div class="card-body d-flex flex-column">
+          <h5>
+            {% if lang == 'ar' %}
+              {{ activity.title_ar }}
+            {% elif lang == 'ku' %}
+              {{ activity.title_ku }}
+            {% elif lang == 'de' %}
+              {{ activity.title_de }}
+            {% else %}
+              {{ activity.title_en }}
+            {% endif %}
+          </h5>
+
+          <p class="text-muted">
+            {{ activity.category }} | {{ activity.date_posted.strftime('%Y-%m-%d') }}
+          </p>
+
+          <a href="{{ url_for('activity_detail', id=activity.id) }}"
+             class="btn btn-primary btn-sm mt-auto">
+            {{ trans['view_details'] }}
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ================= Latest Articles ================= -->
+  <h3 class="mb-4">📰 {{ trans['latest_articles'] }}</h3>
+
+  <div class="row">
+    {% for article in latest_articles %}
+    <div class="col-12 col-sm-6 col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+
+        {% if article.author_image %}
+          <img src="{{ url_for('static', filename='images/uploads/' + article.author_image) }}"
+               class="card-img-top"
+               style="height:220px; object-fit:cover;">
+        {% else %}
+          <img src="{{ url_for('static', filename='images/placeholder.jpg') }}"
+               class="card-img-top"
+               style="height:220px; object-fit:cover;">
+        {% endif %}
+
+        <div class="card-body d-flex flex-column">
+
+          <h5 class="card-title">
+            {% if lang == 'ar' %}
+              {{ article.title_ar }}
+            {% elif lang == 'ku' %}
+              {{ article.title_ku }}
+            {% elif lang == 'de' %}
+              {{ article.title_de }}
+            {% else %}
+              {{ article.title_en }}
+            {% endif %}
+          </h5>
+
+          <p class="card-text text-muted small mb-2">
+            {{ article.date_posted.strftime('%Y-%m-%d') }}
+          </p>
+
+          <p class="card-text">
+            {% if lang == 'ar' %}
+              {{ article.content_ar[:120] }}...
+            {% elif lang == 'ku' %}
+              {{ article.content_ku[:120] }}...
+            {% elif lang == 'de' %}
+              {{ article.content_de[:120] }}...
+            {% else %}
+              {{ article.content_en[:120] }}...
+            {% endif %}
+          </p>
+
+          <a href="{{ url_for('article', id=article.id) }}"
+             class="btn btn-outline-primary btn-sm mt-auto">
+            {{ trans['read_more'] }}
+          </a>
+
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</main>
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% block title %}{{ trans.home }}{% endblock %}
+{% block content %}
+
+<!-- كاروسيل الأخبار العاجلة -->
+<div class="carousel-container">
+    <div id="breakingNewsCarousel" class="carousel slide carousel-smaller" data-bs-ride="carousel">
+        {% if breaking_news and breaking_news|length > 0 %}
+        <!-- المؤشرات -->
+        <div class="carousel-indicators">
+            {% for news in breaking_news %}
+            <button type="button" data-bs-target="#breakingNewsCarousel" data-bs-slide-to="{{ loop.index0 }}" 
+                    class="{% if loop.first %}active{% endif %}" aria-current="{% if loop.first %}true{% endif %}" 
+                    aria-label="Slide {{ loop.index }}"></button>
+            {% endfor %}
+        </div>
+
+        <!-- محتوى الكاروسيل -->
+        <div class="carousel-inner">
+            {% for news in breaking_news %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <img src="{% if news.image %}{{ url_for('static', filename='uploads/' + news.image) }}{% else %}{{ url_for('static', filename='images/default-news.jpg') }}{% endif %}" 
+                     class="d-block w-100" alt="{{ news.title_ar }}">
+                <div class="carousel-caption">
+                    <h3>
+                        {% if lang == 'ar' %}{{ news.title_ar }}
+                        {% elif lang == 'en' %}{{ news.title_en }}
+                        {% elif lang == 'ku' %}{{ news.title_ku or news.title_ar }}
+                        {% elif lang == 'de' %}{{ news.title_de or news.title_en }}
+                        {% else %}{{ news.title_en }}{% endif %}
+                    </h3>
+                    <p>
+                        {% if lang == 'ar' %}{{ news.content_ar|truncate(150) }}
+                        {% elif lang == 'en' %}{{ news.content_en|truncate(150) }}
+                        {% elif lang == 'ku' %}{{ news.content_ku or news.content_ar|truncate(150) }}
+                        {% elif lang == 'de' %}{{ news.content_de or news.content_en|truncate(150) }}
+                        {% else %}{{ news.content_en|truncate(150) }}{% endif %}
+                    </p>
+                    <small class="news-date">
+                        <i class="bi bi-calendar me-1"></i>
+                        {{ news.date_posted.strftime('%Y-%m-%d') }}
+                    </small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- أزرار التحكم -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#breakingNewsCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#breakingNewsCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+        
+        {% else %}
+        <!-- حالة عدم وجود أخبار عاجلة -->
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{{ url_for('static', filename='images/default-banner.jpg') }}" class="d-block w-100" alt="Default Banner">
+                <div class="carousel-caption">
+                    <h3>{{ trans.welcome }}</h3>
+                    <p>{{ trans.welcome_message }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- قسم الأنشطة أسفل الكاروسيل -->
+<div class="container mt-5">
+    <!-- عنوان قسم الأنشطة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="section-header text-center">
+                <h2 class="section-title">
+                    <i class="bi bi-calendar-event me-2 text-primary"></i>
+                    {{ trans.recent_activities }}
+                </h2>
+                <p class="section-subtitle text-muted">
+                    {{ trans.latest_activities_description }}
+                </p>
+                <div class="section-divider">
+                    <div class="divider-line"></div>
+                    <div class="divider-icon">
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </div>
+                    <div class="divider-line"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- شبكة الأنشطة -->
+    {% if activities and activities|length > 0 %}
+    <div class="row g-4">
+        {% for activity in activities %}
+        <div class="col-lg-4 col-md-6">
+            <div class="activity-card card border-0 shadow-sm h-100">
+                <!-- صورة النشاط -->
+                <div class="activity-image position-relative">
+                    {% if activity.images %}
+                        {% set images_list = activity.images.split(',') %}
+                        <img src="{{ url_for('static', filename='uploads/' + images_list[0]) }}" 
+                             class="card-img-top" alt="{{ activity.title_ar }}"
+                             style="height: 250px; object-fit: cover;">
+                        {% if images_list|length > 1 %}
+                        <span class="badge bg-primary position-absolute top-0 end-0 m-2">
+                            <i class="bi bi-images me-1"></i>{{ images_list|length }}
+                        </span>
+                        {% endif %}
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default-activity.jpg') }}" 
+                             class="card-img-top" alt="Default Activity"
+                             style="height: 250px; object-fit: cover;">
+                    {% endif %}
+                    <div class="category-badge position-absolute top-0 start-0 m-2">
+                        <span class="badge 
+                            {% if activity.category == 'education' %}bg-primary
+                            {% elif activity.category == 'sports' %}bg-success
+                            {% elif activity.category == 'arts' %}bg-info
+                            {% elif activity.category == 'cultural' %}bg-warning text-dark
+                            {% else %}bg-secondary{% endif %}">
+                            {{ activity.category }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- محتوى النشاط -->
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark mb-3">
+                        {% if lang == 'ar' %}{{ activity.title_ar }}
+                        {% elif lang == 'en' %}{{ activity.title_en }}
+                        {% elif lang == 'ku' %}{{ activity.title_ku or activity.title_ar }}
+                        {% elif lang == 'de' %}{{ activity.title_de or activity.title_en }}
+                        {% else %}{{ activity.title_en }}{% endif %}
+                    </h5>
+                    
+                    <p class="card-text text-muted mb-3">
+                        {% if lang == 'ar' %}{{ activity.description_ar|truncate(120) }}
+                        {% elif lang == 'en' %}{{ activity.description_en|truncate(120) }}
+                        {% elif lang == 'ku' %}{{ activity.description_ku or activity.description_ar|truncate(120) }}
+                        {% elif lang == 'de' %}{{ activity.description_de or activity.description_en|truncate(120) }}
+                        {% else %}{{ activity.description_en|truncate(120) }}{% endif %}
+                    </p>
+
+                    <div class="activity-meta d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar me-1"></i>
+                            {{ activity.date_posted.strftime('%Y-%m-%d') }}
+                        </small>
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            {{ activity.date_posted.strftime('%H:%M') }}
+                        </small>
+                    </div>
+                </div>
+
+                <!-- زر التفاصيل -->
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a href="{{ url_for('activities', lang=lang) }}#activity-{{ activity.id }}" 
+                       class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-eye me-1"></i>
+                        {{ trans.view_details }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- زر عرض المزيد -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('activities', lang=lang) }}" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-arrow-right me-2"></i>
+                {{ trans.view_all_activities }}
+            </a>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- حالة عدم وجود أنشطة -->
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x display-1 text-muted mb-3"></i>
+                <h4 class="text-muted">{{ trans.no_activities }}</h4>
+                <p class="text-muted mb-4">{{ trans.no_activities_description }}</p>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                <a href="{{ url_for('dashboard', lang=lang) }}#add-activity" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    {{ trans.add_first_activity }}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- الأقسام الإضافية الأخرى -->
+<!-- يمكنك إضافة الأقسام الأخرى هنا مثل Quick Links, About, etc -->
+
+<style>
+/* تنسيقات خاصة للواجهة الرئيسية */
+.section-header {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--dark-green);
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.divider-line {
+    height: 2px;
+    width: 80px;
+    background: var(--gold-gradient);
+    border-radius: 2px;
+}
+
+.divider-icon {
+    font-size: 1.2rem;
+}
+
+.activity-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.activity-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.activity-image {
+    overflow: hidden;
+}
+
+.activity-image img {
+    transition: transform 0.3s ease;
+}
+
+.activity-card:hover .activity-image img {
+    transform: scale(1.05);
+}
+
+.news-date {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .activity-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .section-divider {
+        gap: 0.5rem;
+    }
+    
+    .divider-line {
+        width: 50px;
+    }
+}
+</style>
+
+{% endblock %}

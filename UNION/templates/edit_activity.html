@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}{{ trans.edit_activity }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{{ trans.edit_activity }}</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>النص بالإنجليزية</h6>
+                <div class="mb-3">
+                    <label class="form-label">العنوان (إنجليزي) *</label>
+                    <input type="text" class="form-control" name="title_en" value="{{ activity.title_en }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">الوصف (إنجليزي) *</label>
+                    <textarea class="form-control" name="description_en" rows="5" required>{{ activity.description_en }}</textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>النص بالعربية</h6>
+                <div class="mb-3">
+                    <label class="form-label">العنوان (عربي) *</label>
+                    <input type="text" class="form-control" name="title_ar" value="{{ activity.title_ar }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">الوصف (عربي) *</label>
+                    <textarea class="form-control" name="description_ar" rows="5" required>{{ activity.description_ar }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h6>النص بالكردية (اختياري)</h6>
+                <div class="mb-3">
+                    <label class="form-label">العنوان (كردي)</label>
+                    <input type="text" class="form-control" name="title_ku" value="{{ activity.title_ku or '' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">الوصف (كردي)</label>
+                    <textarea class="form-control" name="description_ku" rows="5">{{ activity.description_ku or '' }}</textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>النص بالألمانية (اختياري)</h6>
+                <div class="mb-3">
+                    <label class="form-label">العنوان (ألماني)</label>
+                    <input type="text" class="form-control" name="title_de" value="{{ activity.title_de or '' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">الوصف (ألماني)</label>
+                    <textarea class="form-control" name="description_de" rows="5">{{ activity.description_de or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">التصنيف *</label>
+                    <select class="form-select" name="category" required>
+                        <option value="education" {% if activity.category == 'education' %}selected{% endif %}>التعليم</option>
+                        <option value="sports" {% if activity.category == 'sports' %}selected{% endif %}>الرياضة</option>
+                        <option value="arts" {% if activity.category == 'arts' %}selected{% endif %}>الفنون</option>
+                        <option value="other" {% if activity.category == 'other' %}selected{% endif %}>أخرى</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">إضافة صور جديدة (اختياري)</label>
+                    <input type="file" class="form-control" name="new_images" multiple accept="image/*">
+                    {% if activity.images %}
+                        <small class="form-text text-muted">
+                            الصور الحالية: {{ activity.images.split(',')|length }} صورة
+                        </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">تحديث النشاط</button>
+            <a href="{{ url_for('dashboard', lang=lang) }}" class="btn btn-secondary">إلغاء</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

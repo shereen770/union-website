@@ -1,0 +1,1225 @@
+{% extends "base.html" %}
+{% block title %}{{ trans.dashboard }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- رأس الداشبورد -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2 text-dark">{{ trans.dashboard }}</h1>
+                    <p class="text-muted mb-0">مرحباً بك في لوحة التحكم - إدارة محتوى الموقع</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6">
+                        <i class="bi bi-person-circle me-2"></i>{{ current_user.username }}
+                    </span>
+                    <div class="mt-1">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            <span class="current-time">--:--</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بطاقات الإحصائيات -->
+    <div class="row mb-5">
+        <!-- حساب الإجماليات -->
+        {% set total_activities = activities|length if activities is defined else 0 %}
+        {% set total_articles = articles|length if articles is defined else 0 %}
+        {% set total_breaking_news = breaking_news|length if breaking_news is defined else 0 %}
+        {% set total_content = total_activities + total_articles + total_breaking_news %}
+
+        <!-- حساب النسب - الإصدار المصحح -->
+        {% set activities_percent = (total_activities / total_content * 100)|round(1) if total_content > 0 else 0 %}
+        {% set articles_percent = (total_articles / total_content * 100)|round(1) if total_content > 0 else 0 %}
+        
+        <!-- الأخبار العاجلة النشطة -->
+        {% if breaking_news is defined and breaking_news|length > 0 %}
+            {% set active_breaking_news = breaking_news|selectattr('is_active')|list %}
+            {% set breaking_news_percent = (active_breaking_news|length / breaking_news|length * 100)|round(1) if breaking_news|length > 0 else 0 %}
+        {% else %}
+            {% set breaking_news_percent = 0 %}
+        {% endif %}
+
+        <!-- الأنشطة بالصور -->
+        {% if activities is defined and activities|length > 0 %}
+            {% set activities_with_images = activities|selectattr('images')|list %}
+            {% set images_percent = (activities_with_images|length / activities|length * 100)|round(1) if activities|length > 0 else 0 %}
+        {% else %}
+            {% set activities_with_images = [] %}
+            {% set images_percent = 0 %}
+        {% endif %}
+
+        <!-- البطاقة 1: الأنشطة -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon me-3">
+                            <i class="bi bi-calendar-event text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0 fw-bold">{{ total_activities }}</h4>
+                            <p class="text-muted mb-0">إجمالي الأنشطة</p>
+                        </div>
+                    </div>
+                    <div class="stat-progress mt-3">
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-primary" role="progressbar"
+                                 style="width: {{ activities_percent }}%;"
+                                 aria-valuenow="{{ activities_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- البطاقة 2: المقالات -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon me-3">
+                            <i class="bi bi-newspaper text-success"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0 fw-bold">{{ total_articles }}</h4>
+                            <p class="text-muted mb-0">إجمالي المقالات</p>
+                        </div>
+                    </div>
+                    <div class="stat-progress mt-3">
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: {{ articles_percent }}%;"
+                                 aria-valuenow="{{ articles_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- البطاقة 3: الأخبار العاجلة -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon me-3">
+                            <i class="bi bi-megaphone text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0 fw-bold">{{ total_breaking_news }}</h4>
+                            <p class="text-muted mb-0">الأخبار العاجلة</p>
+                        </div>
+                    </div>
+                    <div class="stat-progress mt-3">
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-warning" role="progressbar"
+                                 style="width: {{ breaking_news_percent }}%;"
+                                 aria-valuenow="{{ breaking_news_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- البطاقة 4: أنشطة بالصور -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon me-3">
+                            <i class="bi bi-images text-info"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0 fw-bold">{{ activities_with_images|length }}</h4>
+                            <p class="text-muted mb-0">أنشطة بالصور</p>
+                        </div>
+                    </div>
+                    <div class="stat-progress mt-3">
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-info" role="progressbar"
+                                 style="width: {{ images_percent }}%;"
+                                 aria-valuenow="{{ images_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الإجراءات السريعة -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning-charge text-warning me-2"></i>
+                        الإجراءات السريعة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="#add-activity" class="quick-action-card text-decoration-none">
+                                <div class="card border-0 bg-primary text-white h-100">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-plus-circle display-6 d-block mb-2"></i>
+                                        <h6 class="mb-0">نشاط جديد</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="#add-article" class="quick-action-card text-decoration-none">
+                                <div class="card border-0 bg-success text-white h-100">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-file-text display-6 d-block mb-2"></i>
+                                        <h6 class="mb-0">مقال جديد</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="#add-breaking-news" class="quick-action-card text-decoration-none">
+                                <div class="card border-0 bg-danger text-white h-100">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-megaphone display-6 d-block mb-2"></i>
+                                        <h6 class="mb-0">خبر عاجل</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="{{ url_for('activities', lang=lang) }}" class="quick-action-card text-decoration-none">
+                                <div class="card border-0 bg-info text-white h-100">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-eye display-6 d-block mb-2"></i>
+                                        <h6 class="mb-0">عرض الأنشطة</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="{{ url_for('articles', lang=lang) }}" class="quick-action-card text-decoration-none">
+                                <div class="card border-0 bg-warning text-dark h-100">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-newspaper display-6 d-block mb-2"></i>
+                                        <h6 class="mb-0">عرض المقالات</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-xl-2 col-md-4 col-sm-6">
+                            <a href="{{ url_for('debug_db') }}" target="_blank" class="quick-action-card text-decoration-none">
+                                <div class="card border-0 bg-secondary text-white h-100">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-graph-up display-6 d-block mb-2"></i>
+                                        <h6 class="mb-0">حالة النظام</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- العمود الأيسر - النماذج -->
+        <div class="col-xl-8">
+            <!-- إضافة نشاط -->
+            <div class="card mb-4 border-0 shadow-sm" id="add-activity">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>إضافة نشاط جديد
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-primary">
+                                        <i class="bi bi-translate me-2"></i>النص بالإنجليزية
+                                    </h6>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">العنوان (إنجليزي) *</label>
+                                        <input type="text" class="form-control" name="title_en" required 
+                                               placeholder="أدخل العنوان بالإنجليزية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">الوصف (إنجليزي) *</label>
+                                        <textarea class="form-control" name="description_en" rows="3" required 
+                                                  placeholder="أدخل الوصف بالإنجليزية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-primary">
+                                        <i class="bi bi-translate me-2"></i>النص بالعربية
+                                    </h6>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">العنوان (عربي) *</label>
+                                        <input type="text" class="form-control" name="title_ar" required 
+                                               placeholder="أدخل العنوان بالعربية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">الوصف (عربي) *</label>
+                                        <textarea class="form-control" name="description_ar" rows="3" required 
+                                                  placeholder="أدخل الوصف بالعربية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-muted">
+                                        <i class="bi bi-translate me-2"></i>النص بالكردية (اختياري)
+                                    </h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">العنوان (كردي)</label>
+                                        <input type="text" class="form-control" name="title_ku" 
+                                               placeholder="أدخل العنوان بالكردية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">الوصف (كردي)</label>
+                                        <textarea class="form-control" name="description_ku" rows="3" 
+                                                  placeholder="أدخل الوصف بالكردية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-muted">
+                                        <i class="bi bi-translate me-2"></i>النص بالألمانية (اختياري)
+                                    </h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">العنوان (ألماني)</label>
+                                        <input type="text" class="form-control" name="title_de" 
+                                               placeholder="أدخل العنوان بالألمانية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">الوصف (ألماني)</label>
+                                        <textarea class="form-control" name="description_de" rows="3" 
+                                                  placeholder="أدخل الوصف بالألمانية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">التصنيف *</label>
+                                    <select class="form-select" name="category" required>
+                                        <option value="">اختر التصنيف</option>
+                                        <option value="education">التعليم</option>
+                                        <option value="sports">الرياضة</option>
+                                        <option value="arts">الفنون</option>
+                                        <option value="cultural">الثقافية</option>
+                                        <option value="social">الاجتماعية</option>
+                                        <option value="other">أخرى</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">الصور (اختياري)</label>
+                                    <input type="file" class="form-control" name="images" multiple accept="image/*">
+                                    <small class="form-text text-muted">يمكنك اختيار أكثر من صورة - الأنواع المسموحة: PNG, JPG, JPEG, GIF, WEBP</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" name="add_activity" class="btn btn-primary btn-lg">
+                                <i class="bi bi-plus-circle me-2"></i>إضافة النشاط
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary btn-lg ms-2">
+                                <i class="bi bi-arrow-clockwise me-2"></i>مسح الحقول
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- إضافة مقال -->
+            <div class="card mb-4 border-0 shadow-sm" id="add-article">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-text me-2"></i>إضافة مقال جديد
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-success">
+                                        <i class="bi bi-translate me-2"></i>النص بالإنجليزية
+                                    </h6>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">العنوان (إنجليزي) *</label>
+                                        <input type="text" class="form-control" name="title_en" required 
+                                               placeholder="أدخل العنوان بالإنجليزية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">المحتوى (إنجليزي) *</label>
+                                        <textarea class="form-control" name="content_en" rows="5" required 
+                                                  placeholder="أدخل محتوى المقال بالإنجليزية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-success">
+                                        <i class="bi bi-translate me-2"></i>النص بالعربية
+                                    </h6>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">العنوان (عربي) *</label>
+                                        <input type="text" class="form-control" name="title_ar" required 
+                                               placeholder="أدخل العنوان بالعربية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">المحتوى (عربي) *</label>
+                                        <textarea class="form-control" name="content_ar" rows="5" required 
+                                                  placeholder="أدخل محتوى المقال بالعربية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-muted">
+                                        <i class="bi bi-translate me-2"></i>النص بالكردية (اختياري)
+                                    </h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">العنوان (كردي)</label>
+                                        <input type="text" class="form-control" name="title_ku" 
+                                               placeholder="أدخل العنوان بالكردية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">المحتوى (كردي)</label>
+                                        <textarea class="form-control" name="content_ku" rows="5" 
+                                                  placeholder="أدخل محتوى المقال بالكردية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-muted">
+                                        <i class="bi bi-translate me-2"></i>النص بالألمانية (اختياري)
+                                    </h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">العنوان (ألماني)</label>
+                                        <input type="text" class="form-control" name="title_de" 
+                                               placeholder="أدخل العنوان بالألمانية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">المحتوى (ألماني)</label>
+                                        <textarea class="form-control" name="content_de" rows="5" 
+                                                  placeholder="أدخل محتوى المقال بالألمانية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">صورة المؤلف (اختياري)</label>
+                                    <input type="file" class="form-control" name="author_image" accept="image/*">
+                                    <small class="form-text text-muted">صورة شخصية للمؤلف - الأنواع المسموحة: PNG, JPG, JPEG, GIF, WEBP</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" name="add_article" class="btn btn-success btn-lg">
+                                <i class="bi bi-plus-circle me-2"></i>إضافة المقال
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary btn-lg ms-2">
+                                <i class="bi bi-arrow-clockwise me-2"></i>مسح الحقول
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- إضافة خبر عاجل -->
+            <div class="card mb-4 border-0 shadow-sm" id="add-breaking-news">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-megaphone me-2"></i>إضافة خبر عاجل
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-danger">النص بالعربية *</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">العنوان (عربي) *</label>
+                                        <input type="text" class="form-control" name="breaking_title_ar" required 
+                                               placeholder="أدخل العنوان العاجل بالعربية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">المحتوى (عربي) *</label>
+                                        <textarea class="form-control" name="breaking_content_ar" rows="3" required 
+                                                  placeholder="أدخل محتوى الخبر بالعربية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-danger">النص بالإنجليزية *</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">العنوان (إنجليزي) *</label>
+                                        <input type="text" class="form-control" name="breaking_title_en" required 
+                                               placeholder="أدخل العنوان العاجل بالإنجليزية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">المحتوى (إنجليزي) *</label>
+                                        <textarea class="form-control" name="breaking_content_en" rows="3" required 
+                                                  placeholder="أدخل محتوى الخبر بالإنجليزية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-muted">النص بالكردية (اختياري)</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">العنوان (كردي)</label>
+                                        <input type="text" class="form-control" name="breaking_title_ku" 
+                                               placeholder="أدخل العنوان بالكردية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">المحتوى (كردي)</label>
+                                        <textarea class="form-control" name="breaking_content_ku" rows="3" 
+                                                  placeholder="أدخل محتوى الخبر بالكردية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title text-muted">النص بالألمانية (اختياري)</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">العنوان (ألماني)</label>
+                                        <input type="text" class="form-control" name="breaking_title_de" 
+                                               placeholder="أدخل العنوان بالألمانية">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">المحتوى (ألماني)</label>
+                                        <textarea class="form-control" name="breaking_content_de" rows="3" 
+                                                  placeholder="أدخل محتوى الخبر بالألمانية"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">صورة الخبر (اختياري)</label>
+                                    <input type="file" class="form-control" name="breaking_image" accept="image/*">
+                                    <small class="form-text text-muted">صورة توضيحية للخبر العاجل</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" name="add_breaking_news" class="btn btn-danger btn-lg">
+                                <i class="bi bi-megaphone me-2"></i>نشر الخبر العاجل
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- العمود الأيمن - الإحصائيات والبيانات -->
+        <div class="col-xl-4">
+            <!-- آخر الأنشطة -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-info text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>آخر الأنشطة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if activities and activities|length > 0 %}
+                        {% for activity in activities[:5] %}
+                        <div class="activity-item mb-3 pb-3 border-bottom">
+                            <div class="d-flex align-items-start">
+                                <div class="activity-icon me-3">
+                                    <i class="bi bi-calendar-check text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ activity.title_ar }}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {{ activity.date_posted.strftime('%Y-%m-%d') }}
+                                        </small>
+                                        <span class="badge bg-light text-dark">{{ activity.category }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center mt-3">
+                            <a href="#activities-list" class="btn btn-outline-info btn-sm">عرض الكل</a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox display-4 text-muted mb-3"></i>
+                            <p class="text-muted mb-0">لا توجد أنشطة</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- آخر المقالات -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-warning text-dark py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-newspaper me-2"></i>آخر المقالات
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if articles and articles|length > 0 %}
+                        {% for article in articles[:5] %}
+                        <div class="article-item mb-3 pb-3 border-bottom">
+                            <div class="d-flex align-items-start">
+                                <div class="article-icon me-3">
+                                    <i class="bi bi-file-text text-success"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ article.title_ar }}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>
+                                        {{ article.date_posted.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center mt-3">
+                            <a href="#articles-list" class="btn btn-outline-warning btn-sm">عرض الكل</a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-journal display-4 text-muted mb-3"></i>
+                            <p class="text-muted mb-0">لا توجد مقالات</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- آخر الأخبار العاجلة -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-megaphone me-2"></i>آخر الأخبار العاجلة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if breaking_news and breaking_news|length > 0 %}
+                        {% for news in breaking_news[:5] %}
+                        <div class="breaking-news-item mb-3 pb-3 border-bottom">
+                            <div class="d-flex align-items-start">
+                                <div class="breaking-news-icon me-3">
+                                    <i class="bi bi-lightning-charge text-warning"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ news.title_ar }}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {{ news.date_posted.strftime('%Y-%m-%d') }}
+                                        </small>
+                                        <span class="badge {% if news.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if news.is_active %}نشط{% else %}غير نشط{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center mt-3">
+                            <a href="#breaking-news-list" class="btn btn-outline-danger btn-sm">عرض الكل</a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-megaphone display-4 text-muted mb-3"></i>
+                            <p class="text-muted mb-0">لا توجد أخبار عاجلة</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- حالة النظام -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up me-2"></i>حالة النظام
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="system-status">
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span>قاعدة البيانات</span>
+                            <span class="badge bg-success">نشط</span>
+                        </div>
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span>التخزين</span>
+                            <span class="badge bg-info">جيد</span>
+                        </div>
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span>آخر تحديث</span>
+                            <span class="text-muted">اليوم</span>
+                        </div>
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('debug_db') }}" target="_blank" class="btn btn-outline-dark btn-sm">
+                                <i class="bi bi-speedometer2 me-2"></i>تفاصيل النظام
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم قوائم البيانات -->
+    <div class="row mt-5">
+        <!-- قائمة الأنشطة -->
+        <div class="col-12" id="activities-list">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-check me-2"></i>الأنشطة المضافة
+                        </h5>
+                        <span class="badge bg-light text-primary fs-6">{{ total_activities }} نشاط</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if activities and activities|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th width="25%">العنوان</th>
+                                    <th width="15%">التصنيف</th>
+                                    <th width="15%">التاريخ</th>
+                                    <th width="15%">الصور</th>
+                                    <th width="25%">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in activities %}
+                                <tr>
+                                    <td><strong>{{ activity.id }}</strong></td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold">{{ activity.title_ar }}</span>
+                                            <small class="text-muted">{{ activity.title_en }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if activity.category == 'education' %}bg-primary
+                                            {% elif activity.category == 'sports' %}bg-success
+                                            {% elif activity.category == 'arts' %}bg-info
+                                            {% elif activity.category == 'cultural' %}bg-warning text-dark
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ activity.category }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {{ activity.date_posted.strftime('%Y-%m-%d') }}
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>
+                                            {{ activity.date_posted.strftime('%H:%M') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% if activity.images %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-image me-1"></i>
+                                                {{ activity.images.split(',')|length }} صورة
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-image me-1"></i>
+                                                لا يوجد
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('edit_activity', id=activity.id, lang=lang) }}" 
+                                               class="btn btn-warning btn-sm" 
+                                               title="تعديل النشاط">
+                                                <i class="bi bi-pencil-square me-1"></i>تعديل
+                                            </a>
+                                            <form action="{{ url_for('delete_activity', id=activity.id) }}" method="POST" style="display:inline;">
+                                                <button type="submit" 
+                                                        class="btn btn-danger btn-sm delete-btn"
+                                                        data-title="{{ activity.title_ar }}"
+                                                        data-type="نشاط"
+                                                        title="حذف النشاط">
+                                                    <i class="bi bi-trash me-1"></i>حذف
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">لا توجد أنشطة مضافة بعد</h4>
+                        <p class="text-muted">ابدأ بإضافة أول نشاط باستخدام النموذج أعلاه</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة المقالات -->
+        <div class="col-12 mt-4" id="articles-list">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-journal-text me-2"></i>المقالات المضافة
+                        </h5>
+                        <span class="badge bg-light text-success fs-6">{{ total_articles }} مقال</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if articles and articles|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th width="30%">العنوان</th>
+                                    <th width="20%">التاريخ</th>
+                                    <th width="15%">صورة المؤلف</th>
+                                    <th width="30%">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for article in articles %}
+                                <tr>
+                                    <td><strong>{{ article.id }}</strong></td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold">{{ article.title_ar }}</span>
+                                            <small class="text-muted">{{ article.title_en }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {{ article.date_posted.strftime('%Y-%m-%d') }}
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>
+                                            {{ article.date_posted.strftime('%H:%M') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% if article.author_image %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-person-badge me-1"></i>
+                                                موجودة
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-person-badge me-1"></i>
+                                                لا يوجد
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('edit_article', id=article.id, lang=lang) }}" 
+                                               class="btn btn-warning btn-sm" 
+                                               title="تعديل المقال">
+                                                <i class="bi bi-pencil-square me-1"></i>تعديل
+                                            </a>
+                                            <form action="{{ url_for('delete_article', id=article.id) }}" method="POST" style="display:inline;">
+                                                <button type="submit" 
+                                                        class="btn btn-danger btn-sm delete-btn"
+                                                        data-title="{{ article.title_ar }}"
+                                                        data-type="مقال"
+                                                        title="حذف المقال">
+                                                    <i class="bi bi-trash me-1"></i>حذف
+                                                </button>
+                                            </form>
+                                            <a href="{{ url_for('article', id=article.id, lang=lang) }}" 
+                                               class="btn btn-info btn-sm" 
+                                               title="عرض المقال">
+                                                <i class="bi bi-eye me-1"></i>عرض
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-journal display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">لا توجد مقالات مضافة بعد</h4>
+                        <p class="text-muted">ابدأ بإضافة أول مقال باستخدام النموذج أعلاه</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة الأخبار العاجلة -->
+        <div class="col-12 mt-4" id="breaking-news-list">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger text-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-megaphone me-2"></i>الأخبار العاجلة
+                        </h5>
+                        <span class="badge bg-light text-danger fs-6">{{ total_breaking_news }} خبر</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if breaking_news and breaking_news|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th width="25%">العنوان</th>
+                                    <th width="15%">الحالة</th>
+                                    <th width="20%">التاريخ</th>
+                                    <th width="15%">الصورة</th>
+                                    <th width="20%">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for news in breaking_news %}
+                                <tr>
+                                    <td><strong>{{ news.id }}</strong></td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold">{{ news.title_ar }}</span>
+                                            <small class="text-muted">{{ news.title_en }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if news.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if news.is_active %}نشط{% else %}غير نشط{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {{ news.date_posted.strftime('%Y-%m-%d') }}
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>
+                                            {{ news.date_posted.strftime('%H:%M') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% if news.image %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-image me-1"></i>
+                                                موجودة
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-image me-1"></i>
+                                                لا يوجد
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('edit_breaking_news', id=news.id, lang=lang) }}" 
+                                               class="btn btn-warning btn-sm" 
+                                               title="تعديل الخبر">
+                                                <i class="bi bi-pencil-square me-1"></i>تعديل
+                                            </a>
+                                            <form action="{{ url_for('delete_breaking_news', id=news.id) }}" method="POST" style="display:inline;">
+                                                <button type="submit" 
+                                                        class="btn btn-danger btn-sm delete-btn"
+                                                        data-title="{{ news.title_ar }}"
+                                                        data-type="خبر عاجل"
+                                                        title="حذف الخبر">
+                                                    <i class="bi bi-trash me-1"></i>حذف
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-megaphone display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">لا توجد أخبار عاجلة مضافة بعد</h4>
+                        <p class="text-muted">ابدأ بإضافة أول خبر عاجل باستخدام النموذج أعلاه</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // تأثيرات الظهور
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.5s ease';
+        
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // التنقل السلس
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // تأكيد الحذف
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const title = this.getAttribute('data-title');
+            const type = this.getAttribute('data-type');
+            
+            if (!confirm('هل أنت متأكد من حذف ' + type + ' "' + title + '"؟')) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // تحديث الوقت الحي
+    function updateCurrentTime() {
+        const now = new Date();
+        const timeString = now.toLocaleString('ar-SA', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        const timeElement = document.querySelector('.current-time');
+        if (timeElement) {
+            timeElement.textContent = timeString;
+        }
+    }
+    
+    // تحديث الوقت فور التحميل ثم كل دقيقة
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 60000);
+});
+</script>
+
+<style>
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.stat-card:nth-child(1) { border-left-color: #007bff; }
+.stat-card:nth-child(2) { border-left-color: #28a745; }
+.stat-card:nth-child(3) { border-left-color: #ffc107; }
+.stat-card:nth-child(4) { border-left-color: #17a2b8; }
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.stat-icon i {
+    font-size: 1.5rem;
+}
+
+.quick-action-card .card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+
+.quick-action-card:hover .card {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.form-section {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid;
+}
+
+.activity-item, .article-item, .breaking-news-item {
+    transition: all 0.3s ease;
+}
+
+.activity-item:hover, .article-item:hover, .breaking-news-item:hover {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: -0.75rem;
+}
+
+.activity-icon, .article-icon, .breaking-news-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.breaking-news-icon {
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.system-status .status-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.system-status .status-item:last-child {
+    border-bottom: none;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+    
+    .stat-card .d-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .stat-icon {
+        margin: 0 auto 1rem auto;
+    }
+    
+    .quick-action-card .col-sm-6 {
+        margin-bottom: 1rem;
+    }
+}
+
+/* تأثيرات إضافية */
+.card-header {
+    border-radius: 10px 10px 0 0;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+</style>
+{% endblock %}

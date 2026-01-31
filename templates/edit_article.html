@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Edit Article{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">✏️ Edit Article</h2>
+
+  <form method="POST" enctype="multipart/form-data">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <input type="text" name="title_en" class="form-control" placeholder="Title (EN)" value="{{ article.title_en }}" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <input type="text" name="title_ar" class="form-control" placeholder="العنوان (AR)" value="{{ article.title_ar }}" required>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <textarea name="content_en" class="form-control" placeholder="Content (EN)" required>{{ article.content_en }}</textarea>
+      </div>
+      <div class="col-md-6 mb-3">
+        <textarea name="content_ar" class="form-control" placeholder="المحتوى (AR)" required>{{ article.content_ar }}</textarea>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <input type="text" name="title_ku" class="form-control" placeholder="Title (KU)" value="{{ article.title_ku }}">
+      </div>
+      <div class="col-md-6 mb-3">
+        <input type="text" name="title_de" class="form-control" placeholder="Title (DE)" value="{{ article.title_de }}">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <textarea name="content_ku" class="form-control" placeholder="Content (KU)">{{ article.content_ku }}</textarea>
+      </div>
+      <div class="col-md-6 mb-3">
+        <textarea name="content_de" class="form-control" placeholder="Content (DE)">{{ article.content_de }}</textarea>
+      </div>
+    </div>
+
+    <div class="col-md-12 mb-3">
+      <input type="file" name="author_image" class="form-control">
+      {% if article.author_image %}
+        <small class="text-muted">Current image: {{ article.author_image }}</small>
+      {% endif %}
+    </div>
+
+    <button class="btn btn-primary">Update Article</button>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

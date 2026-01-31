@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ trans.activities }}{% endblock %}
+{% block content %}
+<br><br><br><br>
+<div class="container">
+    <h2 class="mb-4">{{ trans.activities }}</h2>
+
+    <!-- فلاتر التصنيفات -->
+    <div class="mb-4">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('activities') }}" class="btn btn-outline-primary {% if not category %}active{% endif %}">
+                {{ trans.all_activities }}
+            </a>
+            <a href="{{ url_for('activities', category='education') }}" class="btn btn-outline-primary {% if category == 'education' %}active{% endif %}">
+                {{ trans.education }}
+            </a>
+            <a href="{{ url_for('activities', category='sports') }}" class="btn btn-outline-primary {% if category == 'sports' %}active{% endif %}">
+                {{ trans.sports }}
+            </a>
+            <a href="{{ url_for('activities', category='arts') }}" class="btn btn-outline-primary {% if category == 'arts' %}active{% endif %}">
+                {{ trans.arts }}
+            </a>
+        </div>
+    </div>
+
+    <!-- رسالة إذا لم توجد أنشطة -->
+    {% if not activities %}
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle"></i> لا توجد أنشطة متاحة حالياً.
+    </div>
+    {% endif %}
+
+    <!-- عرض الأنشطة -->
+    <div class="row">
+        {% for activity in activities %}
+        <div class="col-lg-6 col-md-12 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if activity.images %}
+                    {% set first_image = activity.images.split(',')[0] %}
+                    <img src="{{ url_for('static', filename='images/uploads/' + first_image) }}" 
+                         class="card-img-top" 
+                         alt="{% if lang == 'ar' %}{{ activity.title_ar }}{% elif lang == 'ku' %}{{ activity.title_ku }}{% elif lang == 'de' %}{{ activity.title_de }}{% else %}{{ activity.title_en }}{% endif %}" 
+                         style="height: 250px; object-fit: cover;">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" 
+                         class="card-img-top" 
+                         alt="Activity image"
+                         style="height: 250px; object-fit: cover;">
+                {% endif %}
+                
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {% if lang == 'ar' %}
+                            {{ activity.title_ar }}
+                        {% elif lang == 'ku' %}
+                            {{ activity.title_ku }}
+                        {% elif lang == 'de' %}
+                            {{ activity.title_de }}
+                        {% else %}
+                            {{ activity.title_en }}
+                        {% endif %}
+                    </h5>
+                    
+                    <p class="card-text">
+                        {% if lang == 'ar' %}
+                            {{ activity.description_ar }}
+                        {% elif lang == 'ku' %}
+                            {{ activity.description_ku }}
+                        {% elif lang == 'de' %}
+                            {{ activity.description_de }}
+                        {% else %}
+                            {{ activity.description_en }}
+                        {% endif %}
+                    </p>
+                    
+                    {% if activity.images and activity.images.split(',')|length > 1 %}
+                    <div class="mb-3">
+                        <small class="text-muted">{{ activity.images.split(',')|length }} صور متاحة</small>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-footer bg-transparent">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-primary">{{ activity.category }}</span>
+                        <small class="text-muted">
+                            <i class="bi bi-calendar"></i>
+                            {{ activity.date_posted.strftime('%Y-%m-%d') }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

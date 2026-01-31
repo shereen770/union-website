@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>{{ trans.articles }}</h1>
+    <div class="row">
+        {% for article in articles %}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{{ url_for('article', id=article.id) }}">
+                                {% if lang == 'ar' %}{{ article.title_ar }}
+                                {% elif lang == 'ku' %}{{ article.title_ku }}
+                                {% elif lang == 'de' %}{{ article.title_de }}
+                                {% else %}{{ article.title_en }}{% endif %}
+                            </a>
+                        </h5>
+                        <p class="card-text">
+                            {% if lang == 'ar' %}{{ article.content_ar|truncate(200) }}
+                            {% elif lang == 'ku' %}{{ article.content_ku|truncate(200) }}
+                            {% elif lang == 'de' %}{{ article.content_de|truncate(200) }}
+                            {% else %}{{ article.content_en|truncate(200) }}{% endif %}
+                        </p>
+                        <p class="card-text"><small class="text-muted">{{ article.date_posted }}</small></p>
+                        {% if article.author_image %}
+                            <img src="{{ url_for('static', filename='uploads/' + article.author_image) }}" 
+                                 alt="Author Image" 
+                                 class="img-fluid" 
+                                 style="max-width: 100px;">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

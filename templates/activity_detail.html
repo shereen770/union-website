@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ activity.title_en }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <h2>{{ activity.title_en }} / {{ activity.title_ar }}</h2>
+  <p class="text-muted">{{ activity.date_posted.strftime('%Y-%m-%d') }}</p>
+
+  {% if activity.images %}
+    {% for img in activity.images.split(',') %}
+      <img src="{{ url_for('static', filename='images/uploads/' + img) }}"
+           class="img-fluid mb-3">
+    {% endfor %}
+  {% endif %}
+
+  <hr>
+
+  <p>{{ activity.description_en }}</p>
+  <p>{{ activity.description_ar }}</p>
+
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+<!-- templates/contact.html -->
+{% extends "base.html" %}
+{% block title %}{{ trans.contact }}{% endblock %}
+
+{% block content %}
+<br><br><br><br>
+
+<div class="container my-5">
+
+  <h2 class="text-center mb-4">{{ trans.contact }}</h2>
+
+  <!-- النص التعريفي -->
+  <p class="text-center mb-5">
+    {% if lang == 'ar' %}
+      فيما يخص شؤون الطلبة في التعليم العام، والتعليم الخاص، والتعليم الجامعي في إقليم كوردستان،
+      ولجميع الطلبة الراغبين في الاستفسار عن الأمور الأكاديمية أو الحصول على الدعم والمساعدة،
+      يرجى التواصل مع فرعنا في إقليم كوردستان من خلال زملائنا عبر الأرقام التالية:
+    {% elif lang == 'de' %}
+      Für Angelegenheiten der Studierenden im allgemeinen, privaten und universitären Bildungsbereich
+      in der Region Kurdistan sowie für alle Studierenden, die akademische Unterstützung benötigen,
+      kontaktieren Sie bitte unsere Vertretung in der Region Kurdistan über:
+    {% elif lang == 'ku' %}
+      Ji bo karên xwendekaran di perwerdeya giştî, taybet û zanîngehan de li Herêma Kurdistanê,
+      û ji bo hemû xwendekarên ku dixwazin alîkariya akademîk bistînin,
+      ji kerema xwe bi rêya van hejmaran re têkilî daynin:
+    {% else %}
+      For student affairs in public, private, and university education in the Kurdistan Region,
+      and for all students seeking academic support or assistance,
+      please contact our Kurdistan Region branch through the following numbers:
+    {% endif %}
+  </p>
+
+  <div class="row justify-content-center">
+
+    <!-- علي محمود محمد -->
+    <div class="col-md-5 mb-4">
+      <div class="card h-100 shadow-sm text-center">
+<img src="{{ url_for('static', filename='images/ali.jpeg') }}"
+     class="card-img-top contact-avatar"
+     alt="Ali Mahmoud Mohammad">
+
+
+        <div class="card-body">
+          <h5 class="card-title">
+            {% if lang == 'ar' %}علي محمود محمد
+            {% elif lang == 'de' %}Ali Mahmoud Mohammad
+            {% elif lang == 'ku' %}Ali Mahmûd Mihemed
+            {% else %}Ali Mahmoud Mohammad{% endif %}
+          </h5>
+
+          <p class="card-text">
+            {% if lang == 'ar' %}شؤون الطلبة{% else %}Student Affairs{% endif %}
+          </p>
+
+          <p>
+            <strong>+964 785 117 2266</strong>
+          </p>
+
+          <a href="https://wa.me/9647851172266"
+             target="_blank"
+             class="btn btn-success">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ديلان شروو -->
+    <div class="col-md-5 mb-4">
+      <div class="card h-100 shadow-sm text-center">
+<img src="{{ url_for('static', filename='images/dilann.jpeg') }}"
+     class="card-img-top contact-avatar"
+     alt="Dilan Sharo">
+
+
+        <div class="card-body">
+          <h5 class="card-title">
+            {% if lang == 'ar' %}ديلان شروو
+            {% elif lang == 'de' %}Dilan Sharo
+            {% elif lang == 'ku' %}Dîlan Şero
+            {% else %}Dilan Sharo{% endif %}
+          </h5>
+
+          <p class="card-text">
+            {% if lang == 'ar' %}شؤون الطلبة{% else %}Student Affairs{% endif %}
+          </p>
+
+          <p>
+            <strong>+964 751 541 2957</strong>
+          </p>
+
+          <a href="https://wa.me/9647515412957"
+             target="_blank"
+             class="btn btn-success">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="my-5">
+
+  <!-- نموذج التواصل -->
+  <h3 class="text-center mb-4">{{ trans.contact}}</h3>
+
+  <form method="POST" class="mx-auto" style="max-width:600px;">
+    <div class="mb-3">
+      <label class="form-label">{{ trans.name }}</label>
+      <input type="text" name="name" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ trans.email }}</label>
+      <input type="email" name="email" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ trans.message }}</label>
+      <textarea name="message" class="form-control" rows="5" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">
+      {{ trans.send }}
+    </button>
+  </form>
+
+</div>
+
+{% endblock %}
